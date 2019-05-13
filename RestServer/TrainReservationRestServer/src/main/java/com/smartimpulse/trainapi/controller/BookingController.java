@@ -118,7 +118,7 @@ public class BookingController {
 				"Gnana Paala,1234 5678 9012 3456,354,12/10"
 		});
 		Person person = personRepository.findById(id).orElseThrow();
-		Booking booking = repository.findById(bid).get();
+		Booking booking = repository.findById(bid).orElseThrow();
 		
 		if(CCs.contains(String.join(",",cName, cardNo,Short.toString(cvc),exp))) {
 			booking.setPaid(true);

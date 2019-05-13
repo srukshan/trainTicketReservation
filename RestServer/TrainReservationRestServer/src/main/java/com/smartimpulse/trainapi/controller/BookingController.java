@@ -1,6 +1,5 @@
 package com.smartimpulse.trainapi.controller;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +21,7 @@ import com.smartimpulse.trainapi.model.Train;
 import com.smartimpulse.trainapi.repository.BookingRepository;
 import com.smartimpulse.trainapi.repository.PersonRepository;
 import com.smartimpulse.trainapi.repository.TrainRepository;
+import com.smartimpulse.trainapi.service.EmailService;
 
 @RestController
 @RequestMapping("people/{id}/bookings/")
@@ -32,6 +32,8 @@ public class BookingController {
 	private PersonRepository personRepository;
 	@Autowired
 	private TrainRepository trainRepository;
+	@Autowired
+	private EmailService emailService;
 	
 	@GetMapping
 	public List<Booking> GetBookings(@PathVariable long id) {
@@ -46,12 +48,17 @@ public class BookingController {
 		booking.setPaid(false);
 		booking.setGovernment(false);
 		booking = repository.insert(booking);
-		MessagingController controller = new MessagingController();
-		controller.sendSms(new MessageFormat(
-				"Hi "+person.getFirstName()+",\n Your Booking has been completed under the ID "+booking.getId()+" in the train "+train.getName(), 
-				"Best Train Reservation Service", 
-				person.getTelNo()
-				));
+		try {
+			MessagingController controller = new MessagingController();
+			controller.sendSms(new MessageFormat(
+					"Hi "+person.getFirstName()+",\n Your Booking has been completed under the ID "+booking.getId()+" in the train "+train.getName(), 
+					"Best Train Reservation Service", 
+					person.getTelNo()
+					));
+		}catch(Exception e) {}
+		try {
+			emailService.sendMail(person.getEmail(), "Successful Booking", "Please be informed that your booking was done successfully with the id of "+booking.getId()+" and will be confirmed in a while");
+		}catch(Exception e) {}
 		return booking;
 	}
 	
@@ -88,9 +95,37 @@ public class BookingController {
 		});
 		personRepository.findById(id).orElseThrow();
 		Booking booking = repository.findById(bid).get();
+		Person person = personRepository.findById(id).orElseThrow();
 		if(NICs.contains(NIC)) {
 			booking.setGovernment(true);
+			emailService.sendMail(person.getEmail(), "Successfully Confirmed Government Job", "Please be informed that your job is successfully confirmed as government.");
 		}
 		repository.save(booking);
 	}
+	
+	@PostMapping("{bid}/verify/payment")
+	public void SetBookingPayment(
+			@PathVariable long id,
+			@PathVariable long bid,
+			@RequestParam String cardNo,
+			@RequestParam short cvc,
+			@RequestParam String exp,
+			@RequestParam String cName) {
+		List<String> CCs = Arrays.asList(new String[] {
+				"Sachith Rukshan,1234 5678 9012 3456,354,12/05",
+				"Sasindu Lakshitha,1934 5578 9212 3456,384,02/05",
+				"Dinali Sewwandi,1234 5678 9012 3456,354,11/05",
+				"Gnana Paala,1234 5678 9012 3456,354,12/10"
+		});
+		Person person = personRepository.findById(id).orElseThrow();
+		Booking booking = repository.findById(bid).get();
+		
+		if(CCs.contains(String.join(",",cName, cardNo,Short.toString(cvc),exp))) {
+			booking.setPaid(true);
+			emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
+		}
+		repository.save(booking);
+	}
+	
+	
 }

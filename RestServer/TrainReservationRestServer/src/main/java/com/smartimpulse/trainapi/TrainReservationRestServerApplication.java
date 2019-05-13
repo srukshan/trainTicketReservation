@@ -8,5 +8,4 @@ public class TrainReservationRestServerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TrainReservationRestServerApplication.class, args);
 	}
-
 }

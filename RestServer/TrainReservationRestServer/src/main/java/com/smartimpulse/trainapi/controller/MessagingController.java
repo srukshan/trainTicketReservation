@@ -5,15 +5,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("validate/")
+@Controller
 public class MessagingController {
-	@PostMapping("message/")
+	
 	public String sendSms(@RequestBody MessageFormat msg) {
 		try {
 			// Construct data

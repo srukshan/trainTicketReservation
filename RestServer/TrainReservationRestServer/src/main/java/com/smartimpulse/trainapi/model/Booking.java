@@ -4,12 +4,15 @@ import org.springframework.data.annotation.Id;
 
 public class Booking {
 	@Id
-	private long id;
-	private long personId;
-	private long trainId;
+	private String id;
+	private String personId;
+	private String trainId;
 	private double price;
 	private boolean isPaid;
 	private boolean isGovernment;
+	public Booking() {
+		super();
+	}
 	/**
 	 * @param id
 	 * @param personId
@@ -18,7 +21,7 @@ public class Booking {
 	 * @param isPaid
 	 * @param isGovernment
 	 */
-	public Booking(long id, long personId, long trainId, double price, boolean isPaid, boolean isGovernment) {
+	public Booking(String id, String personId,String trainId, double price, boolean isPaid, boolean isGovernment) {
 		super();
 		this.id = id;
 		this.personId = personId;
@@ -27,22 +30,22 @@ public class Booking {
 		this.isPaid = isPaid;
 		this.isGovernment = isGovernment;
 	}
-	public long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
-	public long getPersonId() {
+	public String getPersonId() {
 		return personId;
 	}
-	public void setPersonId(long personId) {
+	public void setPersonId(String personId) {
 		this.personId = personId;
 	}
-	public long getTrainId() {
+	public String getTrainId() {
 		return trainId;
 	}
-	public void setTrainId(long trainId) {
+	public void setTrainId(String trainId) {
 		this.trainId = trainId;
 	}
 	public double getPrice() {

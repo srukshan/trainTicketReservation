@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,12 +37,12 @@ public class BookingController {
 	private EmailService emailService;
 	
 	@GetMapping
-	public List<Booking> GetBookings(@PathVariable long id) {
+	public List<Booking> GetBookings(@PathVariable String id) {
 		return repository.findAllByPersonId(id);
 	}
 	
 	@PostMapping
-	public Booking AddBooking(@PathVariable long id, @RequestBody Booking booking) {
+	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
 		Person person = personRepository.findById(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
 		booking.setPersonId(id);
@@ -63,7 +64,7 @@ public class BookingController {
 	}
 	
 	@PutMapping
-	public Booking UpdateBooking(@PathVariable long id, @RequestBody Booking booking) {
+	public Booking UpdateBooking(@PathVariable String id, @RequestBody Booking booking) {
 		booking.setPersonId(id);
 		Optional<Booking> oldBooking = repository.findById(booking.getId());
 		if(oldBooking.isPresent()) {
@@ -74,17 +75,17 @@ public class BookingController {
 	}
 	
 	@GetMapping("{bid}/")
-	public Optional<Booking> GetBooking(@PathVariable long id, @PathVariable long bid) {
+	public Optional<Booking> GetBooking(@PathVariable String id, @PathVariable String bid) {
 		return repository.findById(bid);
 	}
 	
 	@DeleteMapping("{bid}/")
-	public void DeleteBooking(@PathVariable long id, @PathVariable long bid) {
+	public void DeleteBooking(@PathVariable String id, @PathVariable String bid) {
 		repository.deleteById(bid);
 	}
 	
 	@PostMapping("{bid}/verify/govenment")
-	public void SetBookingGoverment(@PathVariable long id, @PathVariable long bid, @RequestParam String NIC) {
+	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable String bid, @RequestBody String NIC) {
 		List<String> NICs = Arrays.asList(new String[] {
 				"980346936V",
 				"980346935V",
@@ -98,15 +99,18 @@ public class BookingController {
 		Person person = personRepository.findById(id).orElseThrow();
 		if(NICs.contains(NIC)) {
 			booking.setGovernment(true);
-			emailService.sendMail(person.getEmail(), "Successfully Confirmed Government Job", "Please be informed that your job is successfully confirmed as government.");
+			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Government Job", "Please be informed that your job is successfully confirmed as government.");
+			repository.save(booking);
+			return booking;
 		}
-		repository.save(booking);
+		System.out.println(NIC);
+		return null;
 	}
 	
 	@PostMapping("{bid}/verify/payment")
 	public void SetBookingPayment(
-			@PathVariable long id,
-			@PathVariable long bid,
+			@PathVariable String id,
+			@PathVariable String bid,
 			@RequestParam String cardNo,
 			@RequestParam short cvc,
 			@RequestParam String exp,
@@ -122,7 +126,7 @@ public class BookingController {
 		
 		if(CCs.contains(String.join(",",cName, cardNo,Short.toString(cvc),exp))) {
 			booking.setPaid(true);
-			emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
+			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
 		}
 		repository.save(booking);
 	}

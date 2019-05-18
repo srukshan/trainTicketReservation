@@ -4,13 +4,17 @@ import org.springframework.data.annotation.Id;
 
 public class Person {
 	@Id
-	private long id;
+	private String id;
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String telNo;
 	
-	public Person(long id, String firstName, String lastName, String email, String telNo) {
+	public Person(){
+		super();
+	}
+
+	public Person(String id, String firstName, String lastName, String email, String telNo) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -22,14 +26,14 @@ public class Person {
 	/**
 	 * @return the id
 	 */
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

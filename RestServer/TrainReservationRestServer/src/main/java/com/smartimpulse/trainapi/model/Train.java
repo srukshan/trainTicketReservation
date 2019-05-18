@@ -4,8 +4,10 @@ import org.springframework.data.annotation.Id;
 
 public class Train {
 	@Id
-	private long id;
+	private String id;
 	private String name;
+	private String arrival;
+	private String depature;
 	private String arrivalTime;
 	private String depatureTime;
 	private boolean isActive;
@@ -17,24 +19,29 @@ public class Train {
 	/**
 	 * @param id
 	 * @param name
+	 * @param arrival
+	 * @param depature
 	 * @param arrivalTime
 	 * @param depatureTime
 	 * @param isActive
 	 */
-	public Train(long id, String name, String arrivalTime, String depatureTime, boolean isActive) {
+	public Train(String id, String name, String arrival, String depature, String arrivalTime, String depatureTime,
+			boolean isActive) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.arrival = arrival;
+		this.depature = depature;
 		this.arrivalTime = arrivalTime;
 		this.depatureTime = depatureTime;
 		this.isActive = isActive;
 	}
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -69,5 +76,21 @@ public class Train {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-		
+
+	public String getArrival() {
+		return arrival;
+	}
+
+	public void setArrival(String arrival) {
+		this.arrival = arrival;
+	}
+
+	public String getDepature() {
+		return depature;
+	}
+
+	public void setDepature(String depature) {
+		this.depature = depature;
+	}
+	
 }

@@ -1,10 +1,12 @@
 package com.smartimpulse.trainapi.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document
 public class Booking {
 	@Id
-	private long id;
+	private String id;
 	private String personId;
 	private String trainId;
 	private double price;
@@ -21,7 +23,7 @@ public class Booking {
 	 * @param isPaid
 	 * @param isGovernment
 	 */
-	public Booking(long id, String personId,String trainId, double price, boolean isPaid, boolean isGovernment) {
+	public Booking(String id, String personId,String trainId, double price, boolean isPaid, boolean isGovernment) {
 		super();
 		this.id = id;
 		this.personId = personId;
@@ -30,10 +32,10 @@ public class Booking {
 		this.isPaid = isPaid;
 		this.isGovernment = isGovernment;
 	}
-	public long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getPersonId() {

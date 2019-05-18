@@ -40,22 +40,10 @@ public class BookingController {
 		return repository.findAllByPersonId(id);
 	}
 	
-	private long GetNextId() {
-		List<Booking> bookings = repository.findAll();
-		long maxId = 0;
-		for (Booking booking : bookings) {
-			if(booking.getId()>maxId) {
-				maxId = booking.getId();
-			}
-		}
-		return maxId+1;
-	}
-	
 	@PostMapping
 	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
 		Person person = personRepository.findById(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
-		booking.setId(GetNextId());
 		booking.setPersonId(id);
 		booking.setPaid(false);
 		booking.setGovernment(false);
@@ -81,24 +69,22 @@ public class BookingController {
 		if(oldBooking.isPresent()) {
 			booking.setGovernment(oldBooking.get().isGovernment());
 			booking.setPaid(oldBooking.get().isPaid());
-		}else {
-			booking.setId(GetNextId());
 		}
 		return repository.save(booking);
 	}
 	
 	@GetMapping("{bid}/")
-	public Optional<Booking> GetBooking(@PathVariable String id, @PathVariable long bid) {
+	public Optional<Booking> GetBooking(@PathVariable String id, @PathVariable String bid) {
 		return repository.findById(bid);
 	}
 	
 	@DeleteMapping("{bid}/")
-	public void DeleteBooking(@PathVariable String id, @PathVariable long bid) {
+	public void DeleteBooking(@PathVariable String id, @PathVariable String bid) {
 		repository.deleteById(bid);
 	}
 	
 	@PostMapping("{bid}/verify/govenment")
-	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable long bid, @RequestBody String NIC) {
+	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable String bid, @RequestBody String NIC) {
 		List<String> NICs = Arrays.asList(new String[] {
 				"980346936V",
 				"980346935V",
@@ -123,7 +109,7 @@ public class BookingController {
 	@PostMapping("{bid}/verify/payment")
 	public void SetBookingPayment(
 			@PathVariable String id,
-			@PathVariable long bid,
+			@PathVariable String bid,
 			@RequestParam String cardNo,
 			@RequestParam short cvc,
 			@RequestParam String exp,

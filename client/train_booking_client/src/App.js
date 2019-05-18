@@ -4,11 +4,13 @@ import './App.css';
 
 function App() {
   return (
-    <div id="site-content">
-      <Head />
-      <Body />
-      <Footer />
-    </div>
+    <Router>
+      <div id="site-content">
+        <Head />
+        <Body />
+        <Footer />
+      </div>
+    </Router>
   );
 }
 

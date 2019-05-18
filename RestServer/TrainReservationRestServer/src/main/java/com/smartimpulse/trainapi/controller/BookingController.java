@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,10 +40,22 @@ public class BookingController {
 		return repository.findAllByPersonId(id);
 	}
 	
+	private long GetNextId() {
+		List<Booking> bookings = repository.findAll();
+		long maxId = 0;
+		for (Booking booking : bookings) {
+			if(booking.getId()>maxId) {
+				maxId = booking.getId();
+			}
+		}
+		return maxId+1;
+	}
+	
 	@PostMapping
 	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
 		Person person = personRepository.findById(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
+		booking.setId(GetNextId());
 		booking.setPersonId(id);
 		booking.setPaid(false);
 		booking.setGovernment(false);
@@ -70,22 +81,24 @@ public class BookingController {
 		if(oldBooking.isPresent()) {
 			booking.setGovernment(oldBooking.get().isGovernment());
 			booking.setPaid(oldBooking.get().isPaid());
+		}else {
+			booking.setId(GetNextId());
 		}
 		return repository.save(booking);
 	}
 	
 	@GetMapping("{bid}/")
-	public Optional<Booking> GetBooking(@PathVariable String id, @PathVariable String bid) {
+	public Optional<Booking> GetBooking(@PathVariable String id, @PathVariable long bid) {
 		return repository.findById(bid);
 	}
 	
 	@DeleteMapping("{bid}/")
-	public void DeleteBooking(@PathVariable String id, @PathVariable String bid) {
+	public void DeleteBooking(@PathVariable String id, @PathVariable long bid) {
 		repository.deleteById(bid);
 	}
 	
 	@PostMapping("{bid}/verify/govenment")
-	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable String bid, @RequestBody String NIC) {
+	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable long bid, @RequestBody String NIC) {
 		List<String> NICs = Arrays.asList(new String[] {
 				"980346936V",
 				"980346935V",
@@ -110,7 +123,7 @@ public class BookingController {
 	@PostMapping("{bid}/verify/payment")
 	public void SetBookingPayment(
 			@PathVariable String id,
-			@PathVariable String bid,
+			@PathVariable long bid,
 			@RequestParam String cardNo,
 			@RequestParam short cvc,
 			@RequestParam String exp,
@@ -130,6 +143,5 @@ public class BookingController {
 		}
 		repository.save(booking);
 	}
-	
 	
 }

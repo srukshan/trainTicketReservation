@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smartimpulse.trainapi.model.Booking;
-import com.smartimpulse.trainapi.model.Person;
+import com.smartimpulse.trainapi.model.User;
 import com.smartimpulse.trainapi.model.Train;
 import com.smartimpulse.trainapi.repository.BookingRepository;
-import com.smartimpulse.trainapi.repository.PersonRepository;
+import com.smartimpulse.trainapi.repository.UserRepository;
 import com.smartimpulse.trainapi.repository.TrainRepository;
 import com.smartimpulse.trainapi.service.EmailService;
 
@@ -29,7 +29,7 @@ public class BookingController {
 	@Autowired
 	private BookingRepository repository;
 	@Autowired
-	private PersonRepository personRepository;
+	private UserRepository personRepository;
 	@Autowired
 	private TrainRepository trainRepository;
 	@Autowired
@@ -42,7 +42,7 @@ public class BookingController {
 	
 	@PostMapping
 	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
-		Person person = personRepository.findById(id).orElseThrow();
+		User person = personRepository.findById(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
 		booking.setPersonId(id);
 		booking.setPaid(false);
@@ -95,7 +95,7 @@ public class BookingController {
 		});
 		personRepository.findById(id).orElseThrow();
 		Booking booking = repository.findById(bid).get();
-		Person person = personRepository.findById(id).orElseThrow();
+		User person = personRepository.findById(id).orElseThrow();
 		if(NICs.contains(NIC)) {
 			booking.setGovernment(true);
 			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Government Job", "Please be informed that your job is successfully confirmed as government.");
@@ -120,7 +120,7 @@ public class BookingController {
 				"Dinali Sewwandi,1234 5678 9012 3456,354,11/05",
 				"Gnana Paala,1234 5678 9012 3456,354,12/10"
 		});
-		Person person = personRepository.findById(id).orElseThrow();
+		User person = personRepository.findById(id).orElseThrow();
 		Booking booking = repository.findById(bid).orElseThrow();
 		
 		if(CCs.contains(String.join(",",cName, cardNo,Short.toString(cvc),exp))) {

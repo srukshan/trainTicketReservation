@@ -2,8 +2,10 @@ package com.smartimpulse.trainapi.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,8 @@ import com.smartimpulse.trainapi.model.Train;
 import com.smartimpulse.trainapi.repository.BookingRepository;
 import com.smartimpulse.trainapi.repository.UserRepository;
 import com.smartimpulse.trainapi.repository.TrainRepository;
+import com.smartimpulse.trainapi.service.AuthorizenetPaymentService;
+import com.smartimpulse.trainapi.service.DialogPaymentService;
 import com.smartimpulse.trainapi.service.EmailService;
 
 @RestController
@@ -44,6 +48,7 @@ public class BookingController {
 	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
 		User person = personRepository.findById(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
+		booking.setPrice(GetTrainPrice(train, false));
 		booking.setPersonId(id);
 		booking.setPaid(false);
 		booking.setGovernment(false);
@@ -65,12 +70,21 @@ public class BookingController {
 	@PutMapping
 	public Booking UpdateBooking(@PathVariable String id, @RequestBody Booking booking) {
 		booking.setPersonId(id);
-		Optional<Booking> oldBooking = repository.findById(booking.getId());
-		if(oldBooking.isPresent()) {
-			booking.setGovernment(oldBooking.get().isGovernment());
-			booking.setPaid(oldBooking.get().isPaid());
-		}
+		Booking oldBooking = repository.findById(booking.getId()).orElseThrow();
+		Train train = trainRepository.findById(booking.getTrainId()).orElse(trainRepository.findById(oldBooking.getTrainId()).orElseThrow());
+		booking.setTrainId(train.getId());
+		booking.setPrice(GetTrainPrice(train, oldBooking.isGovernment()));
+		booking.setGovernment(oldBooking.isGovernment());
+		booking.setPaid(oldBooking.isPaid());
 		return repository.save(booking);
+	}
+	
+	private double GetTrainPrice(Train t, boolean gov) {
+		if(gov) {
+			return 90.00;
+		}else {
+			return 100.00;
+		}
 	}
 	
 	@GetMapping("{bid}/")
@@ -83,7 +97,7 @@ public class BookingController {
 		repository.deleteById(bid);
 	}
 	
-	@PostMapping("{bid}/verify/govenment")
+	@PostMapping("{bid}/discounts/govenment")
 	public Booking SetBookingGoverment(@PathVariable String id, @PathVariable String bid, @RequestBody String NIC) {
 		List<String> NICs = Arrays.asList(new String[] {
 				"980346936V",
@@ -96,8 +110,12 @@ public class BookingController {
 		personRepository.findById(id).orElseThrow();
 		Booking booking = repository.findById(bid).get();
 		User person = personRepository.findById(id).orElseThrow();
+		if(booking.isGovernment()) {
+			return booking;
+		}
 		if(NICs.contains(NIC)) {
 			booking.setGovernment(true);
+			booking.setPrice(booking.getPrice()*0.9);
 			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Government Job", "Please be informed that your job is successfully confirmed as government.");
 			repository.save(booking);
 			return booking;
@@ -106,24 +124,43 @@ public class BookingController {
 		return null;
 	}
 	
-	@PostMapping("{bid}/verify/payment")
-	public void SetBookingPayment(
+	@PostMapping("{bid}/payment/card")
+	public void SetBookingCardPayment(
 			@PathVariable String id,
 			@PathVariable String bid,
-			@RequestParam String cardNo,
-			@RequestParam short cvc,
-			@RequestParam String exp,
-			@RequestParam String cName) {
-		List<String> CCs = Arrays.asList(new String[] {
-				"Sachith Rukshan,1234 5678 9012 3456,354,12/05",
-				"Sasindu Lakshitha,1934 5578 9212 3456,384,02/05",
-				"Dinali Sewwandi,1234 5678 9012 3456,354,11/05",
-				"Gnana Paala,1234 5678 9012 3456,354,12/10"
-		});
+			@RequestBody Map<String, Object> body) {
+		
 		User person = personRepository.findById(id).orElseThrow();
 		Booking booking = repository.findById(bid).orElseThrow();
+		AuthorizenetPaymentService paymentService = new AuthorizenetPaymentService();
+		if(booking.isPaid()) {
+			return;
+		}
+		if(paymentService.doPayment(
+				body.get("cName").toString(), 
+				body.get("cardNo").toString(),
+				body.get("cvc").toString(),
+				body.get("exp").toString(),
+				booking.getPrice())) {
+			booking.setPaid(true);
+			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
+		}
+		repository.save(booking);
+	}
+	
+	@PostMapping("{bid}/payment/dialog")
+	public void SetBookingDialogPayment(
+			@PathVariable String id,
+			@PathVariable String bid,
+			@RequestParam int pin) {
 		
-		if(CCs.contains(String.join(",",cName, cardNo,Short.toString(cvc),exp))) {
+		User person = personRepository.findById(id).orElseThrow();
+		Booking booking = repository.findById(bid).orElseThrow();
+		DialogPaymentService paymentService = new DialogPaymentService();
+		if(booking.isPaid()) {
+			return;
+		}
+		if(paymentService.doPayment(person.getTelNo(), pin, Double.toString(booking.getPrice()))) {
 			booking.setPaid(true);
 			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
 		}

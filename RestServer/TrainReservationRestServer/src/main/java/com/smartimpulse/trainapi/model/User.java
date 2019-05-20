@@ -1,24 +1,45 @@
 package com.smartimpulse.trainapi.model;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Document
-public class Person {
+public class User {
 	@Id
-	private String id;
+	private ObjectId _id;
+	
+	@Indexed(unique = true)
+	private String username;
+	private String password;
+	
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String telNo;
 	
-	public Person(){
+	public User(){
 		super();
 	}
 
-	public Person(String id, String firstName, String lastName, String email, String telNo) {
+	/**
+	 * @param _id
+	 * @param username
+	 * @param password
+	 * @param firstName
+	 * @param lastName
+	 * @param email
+	 * @param telNo
+	 */
+	public User(ObjectId _id, String username, String password, String firstName, String lastName, String email,
+			String telNo) {
 		super();
-		this.id = id;
+		this._id = _id;
+		this.username = username;
+		this.password = password;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -26,17 +47,45 @@ public class Person {
 	}
 
 	/**
-	 * @return the id
+	 * @return the _id
 	 */
-	public String getId() {
-		return id;
+	public ObjectId get_id() {
+		return _id;
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param _id the _id to set
 	 */
-	public void setId(String id) {
-		this.id = id;
+	public void set_id(ObjectId _id) {
+		this._id = _id;
+	}
+
+	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	/**

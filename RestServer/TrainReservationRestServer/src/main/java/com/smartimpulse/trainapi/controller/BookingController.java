@@ -28,7 +28,7 @@ import com.smartimpulse.trainapi.service.DialogPaymentService;
 import com.smartimpulse.trainapi.service.EmailService;
 
 @RestController
-@RequestMapping("people/{id}/bookings/")
+@RequestMapping("users/{id}/bookings/")
 public class BookingController {
 	@Autowired
 	private BookingRepository repository;
@@ -53,17 +53,6 @@ public class BookingController {
 		booking.setPaid(false);
 		booking.setGovernment(false);
 		booking = repository.insert(booking);
-		try {
-			MessagingController controller = new MessagingController();
-			controller.sendSms(new MessageFormat(
-					"Hi "+person.getFirstName()+",\n Your Booking has been completed under the ID "+booking.getId()+" in the train "+train.getName(), 
-					"Best Train Reservation Service", 
-					person.getTelNo()
-					));
-		}catch(Exception e) {}
-		try {
-			emailService.sendMail(person.getEmail(), "Successful Booking", "Please be informed that your booking was done successfully with the id of "+booking.getId()+" and will be confirmed in a while");
-		}catch(Exception e) {}
 		return booking;
 	}
 	
@@ -143,7 +132,17 @@ public class BookingController {
 				body.get("exp").toString(),
 				booking.getPrice())) {
 			booking.setPaid(true);
-			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
+			try {
+				MessagingController controller = new MessagingController();
+				controller.sendSms(new MessageFormat(
+						"Hi "+person.getFirstName()+",\n Your Payment has been completed under the Booking ID "+booking.getId(), 
+						"Best Train Reservation Service", 
+						person.getTelNo()
+						));
+			}catch(Exception e) {}
+			try {
+				emailService.sendMail(person.getEmail(), "Successful Booking", "Please be informed that your payment was done successfully for the booking id of "+booking.getId());
+			}catch(Exception e) {}
 		}
 		repository.save(booking);
 	}
@@ -162,6 +161,17 @@ public class BookingController {
 		}
 		if(paymentService.doPayment(person.getTelNo(), pin, Double.toString(booking.getPrice()))) {
 			booking.setPaid(true);
+			try {
+				MessagingController controller = new MessagingController();
+				controller.sendSms(new MessageFormat(
+						"Hi "+person.getFirstName()+",\n Your Payment has been completed under the Booking ID "+booking.getId(), 
+						"Best Train Reservation Service", 
+						person.getTelNo()
+						));
+			}catch(Exception e) {}
+			try {
+				emailService.sendMail(person.getEmail(), "Successful Booking", "Please be informed that your payment was done successfully for the booking id of "+booking.getId());
+			}catch(Exception e) {}
 			//emailService.sendMail(person.getEmail(), "Successfully Confirmed Your Payment", "Please be informed that your payment is successfully confirmed and you will recieve your ticket as promised.");
 		}
 		repository.save(booking);

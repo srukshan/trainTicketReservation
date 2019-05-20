@@ -23,7 +23,7 @@ public class MongoUserDetailsService implements UserDetailsService {
 	 * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
 	 */
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = repository.findByUsername(username);
+		User user = repository.findByUsername(username).orElse(null);
 		
 		if(user == null) {
 			throw new UsernameNotFoundException("User Not Found");

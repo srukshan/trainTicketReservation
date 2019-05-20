@@ -30,7 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.GET, "/users/**").authenticated()
 			.antMatchers(HttpMethod.GET).permitAll()
 			.antMatchers(HttpMethod.POST, "/users/").permitAll()
-			.anyRequest().denyAll()
+			.anyRequest().authenticated()
 			.and().httpBasic()
 			.and().sessionManagement().disable();
 	}

@@ -12,6 +12,7 @@ public class Booking {
 	private double price;
 	private boolean isPaid;
 	private boolean isGovernment;
+	private String date;
 	public Booking() {
 		super();
 	}
@@ -23,7 +24,7 @@ public class Booking {
 	 * @param isPaid
 	 * @param isGovernment
 	 */
-	public Booking(String id, String personId,String trainId, double price, boolean isPaid, boolean isGovernment) {
+	public Booking(String id, String personId,String trainId, double price, boolean isPaid, boolean isGovernment, String date) {
 		super();
 		this.id = id;
 		this.personId = personId;
@@ -31,6 +32,7 @@ public class Booking {
 		this.price = price;
 		this.isPaid = isPaid;
 		this.isGovernment = isGovernment;
+		this.setDate(date);
 	}
 	public String getId() {
 		return id;
@@ -67,6 +69,12 @@ public class Booking {
 	}
 	public void setGovernment(boolean isGovernment) {
 		this.isGovernment = isGovernment;
+	}
+	public String getDate() {
+		return date;
+	}
+	public void setDate(String date) {
+		this.date = date;
 	}
 	
 }

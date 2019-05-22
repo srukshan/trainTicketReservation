@@ -46,7 +46,7 @@ public class BookingController {
 	
 	@PostMapping
 	public Booking AddBooking(@PathVariable String id, @RequestBody Booking booking) {
-		User person = personRepository.findById(id).orElseThrow();
+		User user = personRepository.findByUsername(id).orElseThrow();
 		Train train = trainRepository.findById(booking.getTrainId()).orElseThrow();
 		booking.setPrice(GetTrainPrice(train, false));
 		booking.setPersonId(id);
@@ -96,7 +96,7 @@ public class BookingController {
 				"980346932V",
 				"980030415V"
 		});
-		personRepository.findById(id).orElseThrow();
+		personRepository.findByUsername(id).orElseThrow();
 		Booking booking = repository.findById(bid).get();
 		User person = personRepository.findById(id).orElseThrow();
 		if(booking.isGovernment()) {

@@ -96,7 +96,7 @@ public class BookingController {
 				"980346932V",
 				"980030415V"
 		});
-		personRepository.findById(id).orElseThrow();
+		personRepository.findByUsername(id).orElseThrow();
 		Booking booking = repository.findById(bid).get();
 		User person = personRepository.findById(id).orElseThrow();
 		if(booking.isGovernment()) {
